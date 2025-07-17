@@ -1,0 +1,290 @@
+<!-- fivem_report_system/html/index.html -->
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FiveM Report System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <!-- Formularz zgłoszenia problemu -->
+    <div id="reportMenu" class="menu-container">
+        <div class="header">
+            <div class="header-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <h2>Zgłoszenie problemu</h2>
+            <div class="close-btn" id="closeReportBtn"><i class="fas fa-times"></i></div>
+        </div>
+        
+        <div class="content">
+            <form id="reportForm">
+                <div class="form-group">
+                    <label for="category">Kategoria zgłoszenia</label>
+                    <select id="category" required>
+                        <option value="" disabled selected>Wybierz kategorię</option>
+                        <option value="bug">Bug/Błąd gry</option>
+                        <option value="player">Zgłoszenie gracza</option>
+                        <option value="cheating">Cheating/Hacking</option>
+                        <option value="griefing">Griefing</option>
+                        <option value="other">Inne</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="title">Tytuł zgłoszenia</label>
+                    <input type="text" id="title" placeholder="Krótki opis problemu" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Szczegółowy opis</label>
+                    <textarea id="description" rows="5" placeholder="Opisz dokładnie co się stało, gdzie, kiedy..." required></textarea>
+                </div>
+                
+                <div class="form-group player-report" style="display: none;">
+                    <label for="reportedPlayerId">ID zgłaszanego gracza</label>
+                    <input type="text" id="reportedPlayerId" placeholder="Podaj ID gracza">
+                </div>
+                
+                <div class="form-group player-report" style="display: none;">
+                    <label for="reportedPlayerName">Nick zgłaszanego gracza</label>
+                    <input type="text" id="reportedPlayerName" placeholder="Podaj nick gracza">
+                </div>
+                
+                <div class="form-group">
+                    <label for="priority">Priorytet</label>
+                    <select id="priority">
+                        <option value="low">Niski</option>
+                        <option value="medium" selected>Średni</option>
+                        <option value="high">Wysoki</option>
+                        <option value="urgent">Pilny</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Załączniki</label>
+                    <div id="attachments-container" class="attachments-container"></div>
+                    <div class="attachment-actions">
+                        <button type="button" id="takeScreenshot" class="btn btn-secondary">
+                            <i class="fas fa-camera"></i> Zrób screenshot
+                        </button>
+                        <div class="attachment-info">Możesz dodać maksymalnie 5 załączników</div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Wyślij zgłoszenie</button>
+                    <button type="button" class="btn btn-secondary" id="cancelReportBtn">Anuluj</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Panel administratora -->
+    <div id="adminMenu" class="menu-container" style="display: none;">
+        <div class="header">
+            <div class="header-icon"><i class="fas fa-shield-alt"></i></div>
+            <h2>Panel administratora</h2>
+            <div class="close-btn" id="closeAdminBtn"><i class="fas fa-times"></i></div>
+        </div>
+        
+        <div class="content">
+            <div class="admin-tabs">
+                <button class="tab-btn active" data-tab="reports">Zgłoszenia</button>
+                <button class="tab-btn" data-tab="stats">Statystyki</button>
+            </div>
+            
+            <div class="tab-content" id="reports-tab">
+                <div class="filters">
+                    <div class="search-bar">
+                        <input type="text" id="searchReports" placeholder="Szukaj zgłoszeń...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="filter-group">
+                        <select id="statusFilter">
+                            <option value="all">Wszystkie statusy</option>
+                            <option value="open">Otwarte</option>
+                            <option value="in-progress">W trakcie</option>
+                            <option value="resolved">Rozwiązane</option>
+                            <option value="closed">Zamknięte</option>
+                        </select>
+                        <select id="categoryFilter">
+                            <option value="all">Wszystkie kategorie</option>
+                            <option value="bug">Bug/Błąd</option>
+                            <option value="player">Zgłoszenie gracza</option>
+                            <option value="cheating">Cheating</option>
+                            <option value="griefing">Griefing</option>
+                            <option value="other">Inne</option>
+                        </select>
+                        <select id="priorityFilter">
+                            <option value="all">Wszystkie priorytety</option>
+                            <option value="low">Niski</option>
+                            <option value="medium">Średni</option>
+                            <option value="high">Wysoki</option>
+                            <option value="urgent">Pilny</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="reports-list" id="reportsList">
+                    <!-- Tutaj będą wyświetlane zgłoszenia -->
+                    <div class="no-reports">
+                        <i class="fas fa-inbox"></i>
+                        <p>Brak zgłoszeń spełniających kryteria</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="stats-tab" style="display: none;">
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
+                        <div class="stat-value" id="totalReports">0</div>
+                        <div class="stat-label">Wszystkie zgłoszenia</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-exclamation-circle"></i></div>
+                        <div class="stat-value" id="openReports">0</div>
+                        <div class="stat-label">Otwarte</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-sync-alt"></i></div>
+                        <div class="stat-value" id="inProgressReports">0</div>
+                        <div class="stat-label">W trakcie</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                        <div class="stat-value" id="resolvedReports">0</div>
+                        <div class="stat-label">Rozwiązane</div>
+                    </div>
+                </div>
+                
+                <div class="stats-charts">
+                    <div class="chart-container">
+                        <h3>Zgłoszenia według kategorii</h3>
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Zgłoszenia według priorytetu</h3>
+                        <canvas id="priorityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Widok szczegółów zgłoszenia -->
+    <div id="reportDetails" class="menu-container" style="display: none;">
+        <div class="header">
+            <div class="header-icon"><i class="fas fa-file-alt"></i></div>
+            <h2>Szczegóły zgłoszenia <span id="reportIdDisplay"></span></h2>
+            <div class="close-btn" id="closeDetailsBtn"><i class="fas fa-times"></i></div>
+        </div>
+        
+        <div class="content">
+            <div class="report-info">
+                <div class="report-header">
+                    <h3 id="reportTitle">Tytuł zgłoszenia</h3>
+                    <div class="report-badges">
+                        <span class="badge" id="categoryBadge">Bug</span>
+                        <span class="badge" id="priorityBadge">Średni</span>
+                        <span class="badge" id="statusBadge">Otwarty</span>
+                    </div>
+                </div>
+                
+                <div class="report-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-user"></i>
+                        <span id="playerInfo">Gracz: Nick (ID: 123)</span>
+                    </div>
+                    <div class="meta-item" id="reportedPlayerInfo" style="display: none;">
+                        <i class="fas fa-user-slash"></i>
+                        <span>Zgłoszony: Nick (ID: 456)</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span id="reportDate">Data: 01.01.2024 12:00</span>
+                    </div>
+                </div>
+                
+                <div class="report-description">
+                    <h4>Opis zgłoszenia</h4>
+                    <p id="reportDescription">Opis problemu...</p>
+                </div>
+                
+                <div class="report-attachments" id="reportAttachments">
+                    <h4>Załączniki <span id="attachmentsCount">(0)</span></h4>
+                    <div class="attachments-grid" id="attachmentsGrid"></div>
+                </div>
+                
+                <div class="admin-actions" id="adminActions">
+                    <h4>Akcje administratora</h4>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary status-btn" data-status="open">
+                            <i class="fas fa-exclamation-circle"></i> Otwarte
+                        </button>
+                        <button class="btn btn-primary status-btn" data-status="in-progress">
+                            <i class="fas fa-sync-alt"></i> W trakcie
+                        </button>
+                        <button class="btn btn-primary status-btn" data-status="resolved">
+                            <i class="fas fa-check-circle"></i> Rozwiązane
+                        </button>
+                        <button class="btn btn-primary status-btn" data-status="closed">
+                            <i class="fas fa-times-circle"></i> Zamknięte
+                        </button>
+                        <button class="btn btn-secondary" id="assignToMeBtn">
+                            <i class="fas fa-user-check"></i> Przypisz do mnie
+                        </button>
+                        <button class="btn btn-secondary" id="teleportToPlayerBtn">
+                            <i class="fas fa-map-marker-alt"></i> Teleportuj do gracza
+                        </button>
+                    </div>
+                    
+                    <div class="admin-notes">
+                        <h4>Notatki (widoczne tylko dla adminów)</h4>
+                        <textarea id="adminNotes" rows="3" placeholder="Dodaj notatki dotyczące tego zgłoszenia..."></textarea>
+                        <button class="btn btn-secondary" id="saveNotesBtn">Zapisz notatki</button>
+                    </div>
+                </div>
+                
+                <div class="report-chat">
+                    <h4>Komunikacja</h4>
+                    <div class="chat-messages" id="chatMessages"></div>
+                    <div class="chat-input">
+                        <textarea id="messageInput" placeholder="Napisz wiadomość..." rows="2"></textarea>
+                        <div class="chat-actions">
+                            <label for="internalMessage" class="internal-message">
+                                <input type="checkbox" id="internalMessage"> Wiadomość wewnętrzna (tylko dla adminów)
+                            </label>
+                            <button class="btn btn-primary" id="sendMessageBtn">
+                                <i class="fas fa-paper-plane"></i> Wyślij
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Podgląd obrazka -->
+    <div id="imageViewer" class="image-viewer">
+        <div class="image-container">
+            <img id="viewerImage" src="" alt="Załącznik">
+            <div class="close-btn" id="closeImageBtn"><i class="fas fa-times"></i></div>
+        </div>
+    </div>
+    
+    <!-- Powiadomienie o nowym zgłoszeniu -->
+    <div id="notification" class="notification">
+        <div class="notification-icon"><i class="fas fa-bell"></i></div>
+        <div class="notification-content">
+            <div class="notification-title">Nowe zgłoszenie</div>
+            <div class="notification-message" id="notificationMessage">Nowe zgłoszenie od gracza</div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
