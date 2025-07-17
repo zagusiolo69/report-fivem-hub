@@ -100,9 +100,9 @@ export function AdminDashboard({ reports, onUpdateReport }: AdminDashboardProps)
     <div className="min-h-screen bg-background p-6 animate-fade-in">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">
-            Panel Administracyjny - Zgłoszenia
+        <div className="mb-8 bg-card border border-border rounded-lg p-6">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            🛡️ Panel Administracyjny - Zgłoszenia
           </h1>
           <p className="text-muted-foreground">Zarządzaj zgłoszeniami graczy i monitoruj serwer</p>
         </div>
