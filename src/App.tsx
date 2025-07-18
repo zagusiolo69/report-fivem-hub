@@ -2,34 +2,33 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { NavigationMenu } from "./components/NavigationMenu";
-import Index from "./pages/Index";
+import { useState } from "react";
 import ReportPage from "./pages/ReportPage";
 import AdminPage from "./pages/AdminPage";
-import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
+const App = () => {
+  const [currentView, setCurrentView] = useState<'home' | 'report' | 'admin'>('home');
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
         <div className="min-h-screen bg-background">
-          <NavigationMenu />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/report" element={<ReportPage />} />
-            <Route path="/admin" element={<AdminPage />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          {currentView === 'home' && (
+            <div className="container mx-auto px-4 py-8 text-center space-y-6">
+              <h1 className="text-4xl font-bold text-foreground">FiveM Report System</h1>
+              <p className="text-muted-foreground">System działa w tle. Użyj komendy /report w grze.</p>
+            </div>
+          )}
+          {currentView === 'report' && <ReportPage />}
+          {currentView === 'admin' && <AdminPage />}
         </div>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
