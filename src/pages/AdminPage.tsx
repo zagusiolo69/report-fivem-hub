@@ -1,69 +1,143 @@
-
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { X } from "lucide-react";
 import { AdminDashboard } from "@/components/AdminDashboard";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Shield, Lock, AlertTriangle } from "lucide-react";
 import { Report } from "@/types/report";
 
-interface AdminPageProps {
-  onClose: () => void;
-}
-
-const AdminPage = ({ onClose }: AdminPageProps) => {
+export default function AdminPage() {
   const [reports, setReports] = useState<Report[]>([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [adminCode, setAdminCode] = useState("");
+  const [authError, setAuthError] = useState("");
+
+  // Symulacja listy adminów (w prawdziwej implementacji pobierz z bazy danych)
+  const adminCodes = [
+    "ADMIN2024", 
+    "SUPERADMIN", 
+    "MODERATOR123",
+    "FIVEM_ADMIN"
+  ];
 
   useEffect(() => {
-    // Nasłuchiwanie wiadomości z FiveM
-    const handleMessage = (event: MessageEvent) => {
-      const data = event.data;
-      
-      if (data.type === 'loadReports') {
-        setReports(Object.values(data.reports));
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
+    // Sprawdź czy admin jest już zalogowany
+    const savedAuth = localStorage.getItem('admin_authenticated');
+    if (savedAuth === 'true') {
+      setIsAuthenticated(true);
+      loadReports();
+    }
   }, []);
 
-  const handleUpdateReport = (reportId: string, updates: Partial<Report>) => {
-    // Update local state
-    setReports(prevReports => 
-      prevReports.map(report => 
-        report.id === reportId ? { ...report, ...updates } : report
-      )
-    );
+  const loadReports = () => {
+    const savedReports = JSON.parse(localStorage.getItem('reports') || '[]');
+    setReports(savedReports);
+  };
 
-    // Send update to FiveM
-    if (window.GetParentResourceName) {
-      fetch(`https://${window.GetParentResourceName()}/updateReport`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          reportId,
-          updates
-        })
-      });
+  const handleAdminLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (adminCodes.includes(adminCode)) {
+      setIsAuthenticated(true);
+      setAuthError("");
+      localStorage.setItem('admin_authenticated', 'true');
+      localStorage.setItem('admin_code', adminCode);
+      loadReports();
+    } else {
+      setAuthError("Nieprawidłowy kod administratora!");
+      setAdminCode("");
     }
   };
 
-  return (
-    <Card className="w-full h-full max-h-[90vh]">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-        <CardTitle className="text-xl font-bold">Panel administratora</CardTitle>
-        <Button variant="ghost" size="sm" onClick={onClose}>
-          <X className="h-4 w-4" />
-        </Button>
-      </CardHeader>
-      
-      <CardContent className="h-full overflow-hidden">
-        <AdminDashboard reports={reports} onUpdateReport={handleUpdateReport} />
-      </CardContent>
-    </Card>
-  );
-};
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem('admin_authenticated');
+    localStorage.removeItem('admin_code');
+  };
 
-export default AdminPage;
+  const handleUpdateReport = (reportId: string, updates: Partial<Report>) => {
+    const updatedReports = reports.map(report => 
+      report.id === reportId ? { ...report, ...updates } : report
+    );
+    setReports(updatedReports);
+    localStorage.setItem('reports', JSON.stringify(updatedReports));
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <Card className="w-full max-w-md border-2 border-primary/20 shadow-glow">
+          <CardHeader className="text-center">
+            <div className="mx-auto w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mb-4">
+              <Shield className="w-8 h-8 text-primary-foreground" />
+            </div>
+            <CardTitle className="text-2xl bg-gradient-primary bg-clip-text text-transparent">
+              Panel Administratora
+            </CardTitle>
+            <p className="text-muted-foreground">
+              Tylko uprawnieni administratorzy mogą uzyskać dostęp
+            </p>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleAdminLogin} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2 text-foreground">
+                  <Lock className="w-4 h-4 inline mr-2" />
+                  Kod Administratora
+                </label>
+                <Input
+                  type="password"
+                  value={adminCode}
+                  onChange={(e) => setAdminCode(e.target.value)}
+                  placeholder="Wprowadź kod dostępu..."
+                  className="bg-background border-primary/30 focus:border-primary"
+                  required
+                />
+              </div>
+              
+              {authError && (
+                <div className="flex items-center gap-2 p-3 bg-danger/10 border border-danger/20 rounded-md">
+                  <AlertTriangle className="w-4 h-4 text-danger" />
+                  <span className="text-sm text-danger">{authError}</span>
+                </div>
+              )}
+              
+              <Button 
+                type="submit" 
+                className="w-full bg-gradient-primary hover:shadow-glow transition-all"
+              >
+                <Shield className="w-4 h-4 mr-2" />
+                Zaloguj się
+              </Button>
+            </form>
+            
+            <div className="mt-6 p-4 bg-muted/20 rounded-md">
+              <p className="text-xs text-muted-foreground text-center">
+                🔒 Dostęp tylko dla uprawnionego personelu<br/>
+                Wszystkie próby logowania są monitorowane
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative">
+      {/* Przycisk wylogowania */}
+      <div className="absolute top-4 right-4 z-10">
+        <Button 
+          variant="outline" 
+          onClick={handleLogout}
+          className="bg-background/80 backdrop-blur-sm border-primary/30"
+        >
+          <Lock className="w-4 h-4 mr-2" />
+          Wyloguj
+        </Button>
+      </div>
+      
+      <AdminDashboard reports={reports} onUpdateReport={handleUpdateReport} />
+    </div>
+  );
+}

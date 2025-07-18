@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,8 +17,7 @@ import {
   Eye,
   Users,
   TrendingUp,
-  Shield,
-  LogOut
+  Shield
 } from "lucide-react";
 import { Report, ReportStats } from "@/types/report";
 import { ReportDetails } from "./ReportDetails";
@@ -102,57 +100,46 @@ export function AdminDashboard({ reports, onUpdateReport }: AdminDashboardProps)
     <div className="min-h-screen bg-background p-6 animate-fade-in">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8 bg-card border-secondary border rounded-lg p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2 flex items-center gap-3">
-                <div className="w-8 h-8 bg-danger rounded-lg flex items-center justify-center">
-                  <Shield className="w-5 h-5 text-danger-foreground" />
-                </div>
-                Panel Administracyjny - Zgłoszenia
-              </h1>
-              <p className="text-muted-foreground">Zarządzaj zgłoszeniami graczy i monitoruj serwer</p>
-            </div>
-            <Button variant="outline" size="sm" className="border-secondary">
-              <LogOut className="w-4 h-4 mr-2" />
-              Wyloguj
-            </Button>
-          </div>
+        <div className="mb-8 bg-card border border-border rounded-lg p-6">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            🛡️ Panel Administracyjny - Zgłoszenia
+          </h1>
+          <p className="text-muted-foreground">Zarządzaj zgłoszeniami graczy i monitoruj serwer</p>
         </div>
 
         {/* Statystyki */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-          <Card className="hover:shadow-glow transition-all border-border">
+          <Card className="hover:shadow-glow transition-all">
             <CardContent className="p-4 text-center">
               <div className="text-2xl font-bold text-primary">{stats.total}</div>
               <div className="text-sm text-muted-foreground">Wszystkie</div>
             </CardContent>
           </Card>
-          <Card className="hover:shadow-glow transition-all border-border">
+          <Card className="hover:shadow-glow transition-all">
             <CardContent className="p-4 text-center">
               <div className="text-2xl font-bold text-warning">{stats.open}</div>
               <div className="text-sm text-muted-foreground">Otwarte</div>
             </CardContent>
           </Card>
-          <Card className="hover:shadow-glow transition-all border-border">
+          <Card className="hover:shadow-glow transition-all">
             <CardContent className="p-4 text-center">
               <div className="text-2xl font-bold text-primary">{stats.inProgress}</div>
               <div className="text-sm text-muted-foreground">W trakcie</div>
             </CardContent>
           </Card>
-          <Card className="hover:shadow-glow transition-all border-border">
+          <Card className="hover:shadow-glow transition-all">
             <CardContent className="p-4 text-center">
               <div className="text-2xl font-bold text-success">{stats.resolved}</div>
               <div className="text-sm text-muted-foreground">Rozwiązane</div>
             </CardContent>
           </Card>
-          <Card className="hover:shadow-glow transition-all border-border">
+          <Card className="hover:shadow-glow transition-all">
             <CardContent className="p-4 text-center">
               <div className="text-2xl font-bold text-muted-foreground">{stats.closed}</div>
               <div className="text-sm text-muted-foreground">Zamknięte</div>
             </CardContent>
           </Card>
-          <Card className="hover:shadow-danger transition-all border-border">
+          <Card className="hover:shadow-danger transition-all">
             <CardContent className="p-4 text-center">
               <div className="text-2xl font-bold text-danger animate-pulse">{stats.urgent}</div>
               <div className="text-sm text-muted-foreground">Pilne</div>
@@ -161,7 +148,7 @@ export function AdminDashboard({ reports, onUpdateReport }: AdminDashboardProps)
         </div>
 
         {/* Filtry */}
-        <Card className="mb-6 border-border">
+        <Card className="mb-6">
           <CardContent className="p-4">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1">
@@ -179,7 +166,7 @@ export function AdminDashboard({ reports, onUpdateReport }: AdminDashboardProps)
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="px-3 py-2 border border-border rounded-md bg-background text-foreground"
+                  className="px-3 py-2 border rounded-md bg-background"
                 >
                   <option value="all">Wszystkie statusy</option>
                   <option value="open">Otwarte</option>
@@ -190,7 +177,7 @@ export function AdminDashboard({ reports, onUpdateReport }: AdminDashboardProps)
                 <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="px-3 py-2 border border-border rounded-md bg-background text-foreground"
+                  className="px-3 py-2 border rounded-md bg-background"
                 >
                   <option value="all">Wszystkie kategorie</option>
                   <option value="bug">Bug</option>
@@ -207,7 +194,7 @@ export function AdminDashboard({ reports, onUpdateReport }: AdminDashboardProps)
         {/* Lista zgłoszeń */}
         <div className="space-y-4">
           {filteredReports.length === 0 ? (
-            <Card className="border-border">
+            <Card>
               <CardContent className="p-8 text-center">
                 <MessageCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                 <h3 className="text-lg font-semibold mb-2">Brak zgłoszeń</h3>
@@ -216,7 +203,7 @@ export function AdminDashboard({ reports, onUpdateReport }: AdminDashboardProps)
             </Card>
           ) : (
             filteredReports.map((report) => (
-              <Card key={report.id} className="hover:shadow-glow transition-all cursor-pointer border-border" onClick={() => setSelectedReport(report)}>
+              <Card key={report.id} className="hover:shadow-glow transition-all cursor-pointer" onClick={() => setSelectedReport(report)}>
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -265,7 +252,7 @@ export function AdminDashboard({ reports, onUpdateReport }: AdminDashboardProps)
                       </div>
                     </div>
                     
-                    <Button variant="outline" size="sm" className="ml-4 border-border">
+                    <Button variant="outline" size="sm" className="ml-4">
                       <Eye className="w-4 h-4 mr-1" />
                       Zobacz
                     </Button>
