@@ -6,12 +6,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import ReportPage from "./pages/ReportPage";
 import AdminPage from "./pages/AdminPage";
+import HomePage from "./pages/HomePage";
 
 const queryClient = new QueryClient();
 
 const App = () => {
   const [isVisible, setIsVisible] = useState(false);
-  const [currentView, setCurrentView] = useState<'report' | 'admin'>('report');
+  const [currentView, setCurrentView] = useState<'home' | 'report' | 'admin'>('home');
   const [playerData, setPlayerData] = useState({ id: 0, name: "Gracz" });
 
   useEffect(() => {
@@ -35,6 +36,11 @@ const App = () => {
           setCurrentView('admin');
           setIsVisible(true);
           break;
+        case 'showHomeMenu':
+          console.log('Showing home menu');
+          setCurrentView('home');
+          setIsVisible(true);
+          break;
         case 'hideUI':
           console.log('Hiding UI');
           setIsVisible(false);
@@ -47,12 +53,9 @@ const App = () => {
     // Test w przeglądarce - symulacja FiveM
     if (typeof window.GetParentResourceName === 'undefined') {
       console.log('Not in FiveM environment, enabling test mode');
-      // Symuluj otworzenie menu po 2 sekundach dla testów
-      setTimeout(() => {
-        setPlayerData({ id: 1, name: "TestPlayer" });
-        setCurrentView('report');
-        setIsVisible(true);
-      }, 2000);
+      // Pokaż stronę główną domyślnie
+      setCurrentView('home');
+      setIsVisible(true);
     }
     
     return () => window.removeEventListener('message', handleMessage);
@@ -74,11 +77,27 @@ const App = () => {
     }
   };
 
+  const handleOpenReport = () => {
+    setCurrentView('report');
+  };
+
+  const handleOpenAdmin = () => {
+    setCurrentView('admin');
+  };
+
+  const handleBackToHome = () => {
+    setCurrentView('home');
+  };
+
   // Obsługa ESC
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        closeUI();
+        if (currentView === 'home') {
+          closeUI();
+        } else {
+          handleBackToHome();
+        }
       }
     };
 
@@ -87,7 +106,7 @@ const App = () => {
     }
 
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isVisible]);
+  }, [isVisible, currentView]);
 
   console.log('App render - isVisible:', isVisible, 'currentView:', currentView);
 
@@ -97,12 +116,26 @@ const App = () => {
         <Toaster />
         <Sonner />
         {isVisible && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeUI} />
-            <div className="relative bg-background border rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-hidden z-10">
-              {currentView === 'report' && <ReportPage onClose={closeUI} playerData={playerData} />}
-              {currentView === 'admin' && <AdminPage onClose={closeUI} />}
-            </div>
+          <div className="fixed inset-0 z-50">
+            {currentView === 'home' && (
+              <>
+                <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeUI} />
+                <div className="relative h-full overflow-auto">
+                  <HomePage onOpenReport={handleOpenReport} onOpenAdmin={handleOpenAdmin} />
+                </div>
+              </>
+            )}
+            {currentView !== 'home' && (
+              <>
+                <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleBackToHome} />
+                <div className="relative flex items-center justify-center h-full p-4">
+                  <div className="bg-background border rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-hidden z-10">
+                    {currentView === 'report' && <ReportPage onClose={handleBackToHome} playerData={playerData} />}
+                    {currentView === 'admin' && <AdminPage onClose={handleBackToHome} />}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         )}
       </TooltipProvider>
