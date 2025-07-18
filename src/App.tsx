@@ -65,21 +65,19 @@ const App = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isVisible]);
 
-  if (!isVisible) {
-    return null;
-  }
-
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-background border rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-hidden">
-            {currentView === 'report' && <ReportPage onClose={closeUI} playerData={playerData} />}
-            {currentView === 'admin' && <AdminPage onClose={closeUI} />}
+        {isVisible && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+            <div className="bg-background border rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-hidden">
+              {currentView === 'report' && <ReportPage onClose={closeUI} playerData={playerData} />}
+              {currentView === 'admin' && <AdminPage onClose={closeUI} />}
+            </div>
           </div>
-        </div>
+        )}
       </TooltipProvider>
     </QueryClientProvider>
   );
